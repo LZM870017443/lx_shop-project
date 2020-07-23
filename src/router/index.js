@@ -5,7 +5,15 @@ const Home = () => import("./../views/home/Home.vue");
 const Category = () => import("./../views/category/Category.vue");
 const Cart = () => import("./../views/cart/Cart.vue");
 const Mine = () => import("./../views/mine/Mine.vue");
+// 订单
 const Order = () => import("./../views/order/Order.vue");
+const OrderDetail = () => import("./../views/order/children/OrderDetail.vue");
+const MyAddress = () => import("./../views/order/children/MyAddress.vue");
+const AddAddress = () =>
+  import("./../views/order/children/children/AddAddress.vue");
+const EditAddress = () =>
+  import("./../views/order/children/children/EditAddress.vue");
+// 登入
 const Login = () => import("./../views/login/Login.vue");
 Vue.use(VueRouter);
 
@@ -43,9 +51,30 @@ const routes = [
   },
 
   {
-    path: "/order",
+    path: "/confirmOrder",
     name: "order",
     component: Order,
+    children: [
+      {
+        path: "myAddress",
+        name: "myAddress",
+        component: MyAddress,
+        children: [
+          // 添加地址
+          { path: "addAddress", name: "addAddress", component: AddAddress },
+          {
+            path: "editAddress",
+            name: "editAddress",
+            component: EditAddress,
+          },
+        ],
+      },
+      {
+        path: "orderDetail",
+        name: "orderDetail",
+        component: OrderDetail,
+      },
+    ],
   },
   {
     path: "/login",

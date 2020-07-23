@@ -2,7 +2,9 @@
   <div id="cart">
     <!--头部区域-->
     <header class="titleWrapper">
-      <h4><strong>购物车</strong></h4>
+      <h4>
+        <strong>购物车</strong>
+      </h4>
       <button class="clearCart" @click="clearCart">清空购物车</button>
       <!-- @click="clearCart" -->
     </header>
@@ -24,7 +26,7 @@
               ></a>
             </div>
             <div class="center">
-              <img :src="goods.small_image" alt="" />
+              <img :src="goods.small_image" alt />
             </div>
             <div class="right">
               <a href="#">{{ goods.name }}</a>
@@ -61,11 +63,12 @@
           ></a>
           <span style="font-size: 16px;">全选</span>
           <div class="selectAll">
-            合计：<span class="totalPrice">{{ totalPrice | moneyFormat }}</span>
+            合计：
+            <span class="totalPrice">{{ totalPrice | moneyFormat }}</span>
           </div>
         </div>
         <div class="tabBarRight">
-          <a href="#" class="pay">去结算({{ goodsCount }})</a>
+          <a class="pay" @click="toPay()">去结算({{ goodsCount }})</a>
         </div>
       </div>
     </div>
@@ -179,6 +182,16 @@ export default {
           // 点击了取消
           // do nothing
         });
+    },
+    toPay() {
+      if (this.totalPrice > 0) {
+        this.$router.push("/confirmOrder");
+      } else {
+        Toast({
+          message: "请先选择商品后再结算~",
+          duration: 1000,
+        });
+      }
     },
   },
 };

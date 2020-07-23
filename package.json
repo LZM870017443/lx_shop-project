@@ -9,8 +9,10 @@
   },
   "dependencies": {
     "axios": "^0.19.2",
+    "better-scroll": "^1.15.2",
     "core-js": "^3.6.5",
     "fastclick": "^1.0.6",
+    "pubsub-js": "^1.8.0",
     "vant": "^2.8.6",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",
@@ -30,5 +32,9 @@
     "less": "^3.0.4",
     "less-loader": "^5.0.0",
     "vue-template-compiler": "^2.6.11"
-  }
+  },
+  "description": "## Project setup ``` npm install ```",
+  "main": ".eslintrc.js",
+  "author": "",
+  "license": "ISC"
 }
