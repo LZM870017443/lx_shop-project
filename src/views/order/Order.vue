@@ -17,6 +17,42 @@
       style="margin-top: 3rem"
       @click="chooseAddress"
     />
+    <!-- 送达时间 -->
+    <van-cell-group style="margin-top: 0.5rem">
+      <van-cell title="送达时间" value="请选择送达时间" is-link />
+      <van-cell center value="共5件" is-link>
+        <template>
+          <img src="./images/detail1.jpg" style="width: 3rem;" />
+          <img src="./images/detail1.jpg" style="width: 3rem;" />
+          <img src="./images/detail1.jpg" style="width: 3rem;" />
+        </template>
+      </van-cell>
+    </van-cell-group>
+
+    <!-- 支付方式 -->
+    <van-cell-group style="margin-top: 0.5rem">
+      <van-cell title="支付方式" value="微信" />
+    </van-cell-group>
+    <!-- 备注 -->
+    <van-cell-group style="margin-top: 0.5rem">
+      <van-cell title="备注">
+        <input
+          type="text"
+          style="text-align: right"
+          placeholder="选填，备注您的特殊需求！"
+        />
+      </van-cell>
+    </van-cell-group>
+
+    <!-- 商品全额,配送费 -->
+    <van-cell-group style="margin-top: 0.5rem">
+      <van-cell title="商品全额" value="1.11" />
+      <van-cell title="单元格" value="0.00" />
+    </van-cell-group>
+
+    <!-- 提交订单 -->
+    <van-submit-bar :price="3050" button-text="提交订单" @submit="onSubmit" />
+    <!-- 路由出口 -->
     <transition name="router-slider" mode="out-in">
       <router-view></router-view>
     </transition>
@@ -58,6 +94,8 @@ export default {
     chooseAddress() {
       this.$router.push({ path: "/confirmOrder/myAddress" });
     },
+    // 提交订单
+    onSubmit() {},
   },
 };
 </script>

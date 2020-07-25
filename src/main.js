@@ -8,7 +8,7 @@ import FastClick from "fastclick";
 if ("addEventListener" in document) {
   document.addEventListener(
     "DOMContentLoaded",
-    function () {
+    function() {
       FastClick.attach(document.body);
     },
     false
@@ -22,6 +22,9 @@ import "./plugins/vant";
 
 // 引入全局过滤器
 import "@/config/filters";
+
+// 4. 引入rem
+import "@/config/rem.js";
 
 new Vue({
   router,

@@ -108,6 +108,7 @@ export default {
   },
   methods: {
     ...mapMutations(["ADD_GOODS"]),
+    // 请求数据
     async reqData() {
       let res = await getHomeData();
       console.log(res);

@@ -66,3 +66,8 @@ Vue.use(Card);
 // 14. 选项卡
 import { Tab, Tabs } from "vant";
 Vue.use(Tab).use(Tabs);
+
+// 图标
+import { Icon } from "vant";
+
+Vue.use(Icon);

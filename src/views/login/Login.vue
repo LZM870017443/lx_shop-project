@@ -1,23 +1,405 @@
 <template>
-  <div id="Login"></div>
+  <div class="login-container">
+    <!--登录面板内容部分-->
+    <div class="login-inner">
+      <!-- 头部 -->
+      <div class="login-header">
+        <!-- logo -->
+        <div class="login-logo">
+          <img src="./images/lk_logo_sm.png" width="300px" alt />
+        </div>
+        <!--标题-->
+        <div class="login-header-title">
+          <a
+            href="javaseript:;"
+            :class="{ current: loginMode }"
+            @click="dealloginMode(true)"
+            >手机登入</a
+          >
+          <a
+            href="javaseript:;"
+            :class="{ current: !loginMode }"
+            @click="dealloginMode(false)"
+            >密码登入</a
+          >
+        </div>
+      </div>
+
+      <!-- 表单内容 -->
+      <div class="login-content">
+        <form>
+          <!-- 手机登入 -->
+          <div :class="{ current: loginMode }">
+            <section class="login-message">
+              <input
+                type="text"
+                maxlength="11"
+                placeholder="手机号"
+                v-model="phone"
+              />
+              <button
+                v-if="!countDown"
+                class="get-verification"
+                :class="{ phone_right: phoneRight }"
+                @click.prevent="getVerifyCode()"
+              >
+                获取验证码
+              </button>
+              <button v-else disabled="disabled" class="get-verification">
+                已发送({{ countDown }}s)
+              </button>
+            </section>
+            <section class="login-verification">
+              <input
+                type="text"
+                maxlength="6"
+                placeholder="验证码"
+                v-model="code"
+              />
+            </section>
+            <section class="login-hint">
+              温馨提示：测试账号请输入手机号码，获取验证码，验证码均为666666
+              <a href="javascript:;">采用微信扫码支付</a>
+            </section>
+          </div>
+          <!-- 密码登入 -->
+          <div :class="{ current: !loginMode }">
+            <section>
+              <!-- 输入用户名 -->
+              <section class="login-message">
+                <input type="tel" placeholder="请输入用户名" />
+              </section>
+              <!-- 输入密码 -->
+              <section class="login-verification">
+                <input
+                  type="password"
+                  maxlength="20"
+                  placeholder="请输入密码"
+                  autocomplete="off"
+                />
+                <div class="switch-show">
+                  <img src="./images/hide_pwd.png" class="on" alt width="20" />
+                  <img src="./images/show_pwd.png" alt width="20" />
+                </div>
+              </section>
+              <!-- 输入图形验证 -->
+              <section class="login-message">
+                <input type="text" maxlength="4" placeholder="请输入验证码" />
+                <img
+                  class="get-verification"
+                  src="http://demo.itlike.com/web/xlmc/api/captcha"
+                  alt="captcha"
+                />
+              </section>
+            </section>
+          </div>
+
+          <!-- 登入按钮 -->
+          <button class="login-submit" @click.prevent="login">登录</button>
+        </form>
+        <button class="login-back">返回</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
+import {
+  getPhoneCode,
+  phoneCodeLogin,
+  pwdLogin,
+} from "./../../service/api/index";
+import { mapActions } from "vuex";
+import { Toast } from "vant";
 export default {
   name: "Login",
   data() {
-    return {};
+    return {
+      loginMode: true, // 登录模式
+      phone: null, // 手机号码
+      countDown: 0, // 倒计时
+      code: null, // 手机验证码
+      userInfo: null, // 用户信息
+
+      user_name: null, // 用户名
+      pwd: null, // 密码
+      pwdMode: true, // true密文 false明文
+      captcha: null, // 图形验证码
+    };
   },
-  computed: {},
+  computed: {
+    // 验证手机号码是否正确
+    phoneRight() {
+      return /^[1][3,4,5,7,8][0-9]{9}$/.test(this.phone);
+    },
+  },
   watch: {},
-  methods: {}
+  methods: {
+    ...mapActions(["syncUserInfo"]),
+
+    // 处理点击
+    dealloginMode(flag) {
+      this.loginMode = flag;
+    },
+    // 获取短信验证码
+    async getVerifyCode() {
+      // 2.1 过滤
+      if (this.phoneRight) {
+        this.countDown = 60;
+        // 2.2 倒计时
+        this.intervalId = setInterval(() => {
+          this.countDown--;
+          if (this.countDown === 0) {
+            clearInterval(this.intervalId);
+          }
+        }, 1000);
+        // 2.3 获取短信验证码
+        let result = await getPhoneCode(this.phone);
+        console.log(result);
+      }
+    },
+    // 3. 登录
+    async login() {
+      // 3.1 判断登录模式
+      if (this.loginMode) {
+        // 手机验证码登录
+        // 3.1.1 输入数据校验
+        if (!this.phone) {
+          // console.log(this.phone);
+          Toast({
+            message: "请输入手机号码",
+            duration: 500,
+          });
+          return;
+        } else if (!this.phoneRight) {
+          // 手机号码不正确
+          Toast({
+            message: "请输入正确的手机号码",
+            duration: 500,
+          });
+          return;
+        }
+
+        if (!this.code) {
+          Toast({
+            message: "请输入验证码",
+            duration: 500,
+          });
+          return;
+        } else if (!/^\d{6}$/gi.test(this.code)) {
+          // 验证码不正确
+          Toast({
+            message: "请输入正确的验证码",
+            duration: 500,
+          });
+          return;
+        }
+        // 3.1.2 手机验证码登录 发起请求
+        console.log(this.code);
+        let result = await phoneCodeLogin(this.phone, this.code);
+        console.log(result);
+        if (result.success_code === 200) {
+          // 4.1 保存用户信息
+          this.syncUserInfo(result.data);
+          // 4.2 回到主面板
+          this.$router.back();
+        } else {
+          Toast({
+            message: "登录失败，手机号码或者验证码不正确！",
+            duration: 500,
+          });
+        }
+        // 3.2 用户名和密码登录
+      } else {
+      }
+    },
+  },
 };
 </script>
 
-<style scoped>
-#Login {
+<style>
+.login-container {
   width: 100%;
   height: 100%;
-  background-color: orange;
+  background: #fff;
+}
+
+.login-container .login-inner {
+  padding-top: 60px;
+  width: 80%;
+  margin: 0 auto;
+}
+
+.login-container .login-inner .login-header .login-logo {
+  font-size: 40px;
+  font-weight: bold;
+  color: #75a342;
+  text-align: center;
+}
+
+.login-container .login-inner .login-header .login-header-title {
+  padding-top: 40px;
+  padding-bottom: 10px;
+  text-align: center;
+}
+
+.login-container .login-inner .login-header .login-header-title > a {
+  color: #333;
+  font-size: 14px;
+  padding-bottom: 4px;
+  text-decoration: none;
+}
+
+.login-container
+  .login-inner
+  .login-header
+  .login-header-title
+  > a:first-child {
+  margin-right: 40px;
+}
+
+.login-container .login-inner .login-header .login-header-title > a.current {
+  color: #75a342;
+  font-weight: 700;
+  border-bottom: 2px solid #75a342;
+}
+
+.login-container .login-inner .login-content > form > div {
+  display: none;
+}
+
+.login-container .login-inner .login-content > form > div.current {
+  display: block;
+}
+
+.login-container .login-inner .login-content > form > div input {
+  width: 100%;
+  height: 100%;
+  padding-left: 8px;
+  box-sizing: border-box;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  outline: 0;
+  font: 400 14px Arial;
+}
+
+.login-container .login-inner .login-content > form > div input:focus {
+  border: 1px solid #75a342;
+}
+
+.login-container .login-inner .login-content > form > div .login-message {
+  position: relative;
+  margin-top: 16px;
+  height: 48px;
+  font-size: 14px;
+  background: #fff;
+}
+
+.login-container
+  .login-inner
+  .login-content
+  > form
+  > div
+  .login-message
+  .get-verification {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  border: 0;
+  color: #ccc;
+  font-size: 14px;
+  background: transparent;
+}
+
+.login-container
+  .login-inner
+  .login-content
+  > form
+  > div
+  .login-message
+  .get-verification.phone_right {
+  color: #75a342;
+}
+
+.login-container .login-inner .login-content > form > div .login-verification {
+  position: relative;
+  margin-top: 16px;
+  height: 48px;
+  font-size: 14px;
+  background: #fff;
+}
+
+.login-container
+  .login-inner
+  .login-content
+  > form
+  > div
+  .login-verification
+  .switch-show {
+  position: absolute;
+  right: 10px;
+  top: 12px;
+}
+
+.login-container
+  .login-inner
+  .login-content
+  > form
+  > div
+  .login-verification
+  .switch-show
+  img {
+  display: none;
+}
+
+.login-container
+  .login-inner
+  .login-content
+  > form
+  > div
+  .login-verification
+  .switch-show
+  img.on {
+  display: block;
+}
+
+.login-container .login-inner .login-content > form > div .login-hint {
+  margin-top: 12px;
+  color: #999;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.login-container .login-inner .login-content > form > div .login-hint > a {
+  color: #75a342;
+}
+
+.login-container .login-inner .login-content > form .login-submit {
+  display: block;
+  width: 100%;
+  height: 42px;
+  margin-top: 30px;
+  border-radius: 4px;
+  background: #75a342;
+  color: #fff;
+  text-align: center;
+  font-size: 16px;
+  line-height: 42px;
+  border: 0;
+}
+
+.login-container .login-inner .login-content .login-back {
+  display: block;
+  width: 100%;
+  height: 42px;
+  margin-top: 15px;
+  border-radius: 4px;
+  background: transparent;
+  border: 1px solid #75a342;
+  color: #75a342;
+  text-align: center;
+  font-size: 16px;
+  line-height: 42px;
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div id="cart">
+  <div id="cart" v-if="userInfo.token">
     <!--头部区域-->
     <header class="titleWrapper">
       <h4>
@@ -12,11 +12,7 @@
       <!--中间内容-->
       <main class="contentWrapperList">
         <section>
-          <div
-            class="shopCartListCon"
-            v-for="(goods, index) in shopCart"
-            :key="index"
-          >
+          <div class="shopCartListCon" v-for="(goods, index) in shopCart" :key="index">
             <div class="left">
               <a
                 href="javascript:;"
@@ -44,8 +40,7 @@
                         goods.price
                       )
                     "
-                    >+</span
-                  >
+                  >+</span>
                 </div>
               </div>
             </div>
@@ -73,19 +68,24 @@
       </div>
     </div>
   </div>
+  <SelectLogin v-else />
 </template>
 
 <script>
 import { mapState, mapMutations } from "vuex";
 import { Dialog, Toast } from "vant";
 import PubSub from "pubsub-js";
+import SelectLogin from "./../login/SelectLogin";
 export default {
   name: "Cart",
   data() {
     return {};
   },
+  components: {
+    SelectLogin
+  },
   computed: {
-    ...mapState(["shopCart"]),
+    ...mapState(["shopCart", "userInfo"]),
     // 0. 选中商品的总件数
     goodsCount() {
       // return Object.keys(this.shopCart).length;
@@ -121,16 +121,15 @@ export default {
         }
       });
       return totalPrice;
-    },
+    }
   },
-  watch: {},
   methods: {
     ...mapMutations([
       "REDUCE_CART",
       "ADD_GOODS",
       "SELECTED_SINGER_GOODS",
       "SELECTED_All_GOODS",
-      "CLEAR_CART",
+      "CLEAR_CART"
     ]),
     //添加商品
     addToCart(goodsId, goodsName, smallImage, goodsPrice) {
@@ -145,7 +144,7 @@ export default {
           //稍加挽留
           Dialog.confirm({
             title: "友情提示",
-            message: "确定要删除该商品吗？",
+            message: "确定要删除该商品吗？"
           })
             .then(() => {
               // on confirm
@@ -172,7 +171,7 @@ export default {
     clearCart() {
       Dialog.confirm({
         title: "友情提示",
-        message: "确定清空所有商品吗?",
+        message: "确定清空所有商品吗?"
       })
         .then(async () => {
           // 删除成功
@@ -189,11 +188,11 @@ export default {
       } else {
         Toast({
           message: "请先选择商品后再结算~",
-          duration: 1000,
+          duration: 1000
         });
       }
-    },
-  },
+    }
+  }
 };
 </script>
 
