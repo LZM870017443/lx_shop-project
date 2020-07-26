@@ -12,10 +12,10 @@
       >
         <template slot="title">
           <div class="personMsg">
-            <img class="iconImage" src="./images/yjh.png" alt />
+            <img class="iconImage" :src="userInfo.icon_url" alt="" />
             <div class="personInfo">
-              <span>sad</span>
-              <span>手机号：12222222222</span>
+              <span>{{ userInfo.real_name }}</span>
+              <span>手机号：{{ userInfo.phone }}</span>
             </div>
           </div>
         </template>
@@ -43,17 +43,32 @@
     </van-cell-group>
     <!--我的优惠券-->
     <van-cell-group style="margin-top: 0.4rem">
-      <van-cell title="我的优惠券" icon="gold-coin" value="1张" is-link></van-cell>
+      <van-cell
+        title="我的优惠券"
+        icon="gold-coin"
+        value="1张"
+        is-link
+      ></van-cell>
       <van-cell title="我的收货地址" icon="todo-list" is-link></van-cell>
     </van-cell-group>
     <!--联系客服-->
     <van-cell-group style="margin-top: 0.4rem">
-      <van-cell title="联系客服" icon="phone" value="客服时间 07:00-22:00" is-link></van-cell>
+      <van-cell
+        title="联系客服"
+        icon="phone"
+        value="客服时间 07:00-22:00"
+        is-link
+      ></van-cell>
       <van-cell title="意见反馈" icon="smile-comment" is-link></van-cell>
     </van-cell-group>
     <!--小撩买菜-->
     <van-cell-group style="margin-top: 0.4rem">
-      <van-cell title="小撩买菜" icon="gift-card" value="下载APP体验更佳" is-link></van-cell>
+      <van-cell
+        title="小撩买菜"
+        icon="gift-card"
+        value="下载APP体验更佳"
+        is-link
+      ></van-cell>
     </van-cell-group>
 
     <!--路由的出口-->
@@ -77,16 +92,16 @@ export default {
         { icon: "cart-circle-o", title: "待支付" },
         { icon: "gift-o", title: "待收货" },
         { icon: "smile-comment-o", title: "待评价" },
-        { icon: "cash-back-record", title: "售后/退款" }
-      ]
+        { icon: "cash-back-record", title: "售后/退款" },
+      ],
     };
   },
   computed: {
-    ...mapState(["userInfo", "userInfo"])
+    ...mapState(["userInfo"]),
   },
   components: {
-    SelectLogin
-  }
+    SelectLogin,
+  },
 };
 </script>
 

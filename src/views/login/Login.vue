@@ -2,37 +2,35 @@
   <div class="login-container">
     <!--登录面板内容部分-->
     <div class="login-inner">
-      <!-- 头部 -->
+      <!--面板头部-->
       <div class="login-header">
-        <!-- logo -->
         <div class="login-logo">
-          <img src="./images/lk_logo_sm.png" width="300px" alt />
+          <img src="./images/lk_logo_sm.png" alt="" width="300" />
         </div>
-        <!--标题-->
+        <!--面板标题-->
         <div class="login-header-title">
           <a
-            href="javaseript:;"
+            href="javascript:;"
             :class="{ current: loginMode }"
-            @click="dealloginMode(true)"
-            >手机登入</a
+            @click="dealLoginMode(true)"
+            >手机登录</a
           >
           <a
-            href="javaseript:;"
+            href="javascript:;"
             :class="{ current: !loginMode }"
-            @click="dealloginMode(false)"
-            >密码登入</a
+            @click="dealLoginMode(false)"
+            >密码登录(测试)</a
           >
         </div>
       </div>
-
-      <!-- 表单内容 -->
+      <!--面板表单部分-->
       <div class="login-content">
         <form>
-          <!-- 手机登入 -->
+          <!--手机验证码登录部分-->
           <div :class="{ current: loginMode }">
             <section class="login-message">
               <input
-                type="text"
+                type="number"
                 maxlength="11"
                 placeholder="手机号"
                 v-model="phone"
@@ -51,8 +49,8 @@
             </section>
             <section class="login-verification">
               <input
-                type="text"
-                maxlength="6"
+                type="number"
+                maxlength="8"
                 placeholder="验证码"
                 v-model="code"
               />
@@ -62,42 +60,71 @@
               <a href="javascript:;">采用微信扫码支付</a>
             </section>
           </div>
-          <!-- 密码登入 -->
+          <!--账号登录部分-->
           <div :class="{ current: !loginMode }">
             <section>
-              <!-- 输入用户名 -->
               <section class="login-message">
-                <input type="tel" placeholder="请输入用户名" />
+                <input
+                  type="tel"
+                  maxlength="11"
+                  placeholder="用户名"
+                  v-model="user_name"
+                />
               </section>
-              <!-- 输入密码 -->
               <section class="login-verification">
                 <input
+                  v-if="pwdMode"
                   type="password"
                   maxlength="20"
-                  placeholder="请输入密码"
+                  placeholder="密码"
                   autocomplete="off"
+                  v-model="pwd"
+                />
+                <input
+                  v-else
+                  type="text"
+                  maxlength="20"
+                  placeholder="密码"
+                  autocomplete="off"
+                  v-model="pwd"
                 />
                 <div class="switch-show">
-                  <img src="./images/hide_pwd.png" class="on" alt width="20" />
-                  <img src="./images/show_pwd.png" alt width="20" />
+                  <img
+                    src="./images/hide_pwd.png"
+                    :class="{ on: pwdMode }"
+                    @click.prevent="dealPwdMode(false)"
+                    alt=""
+                    width="20"
+                  />
+                  <img
+                    src="./images/show_pwd.png"
+                    :class="{ on: !pwdMode }"
+                    @click.prevent="dealPwdMode(true)"
+                    alt=""
+                    width="20"
+                  />
                 </div>
               </section>
-              <!-- 输入图形验证 -->
               <section class="login-message">
-                <input type="text" maxlength="4" placeholder="请输入验证码" />
+                <input
+                  type="text"
+                  maxlength="4"
+                  placeholder="验证码"
+                  v-model="captcha"
+                />
                 <img
                   class="get-verification"
                   src="http://demo.itlike.com/web/xlmc/api/captcha"
                   alt="captcha"
+                  @click.prevent="getCaptcha"
+                  ref="captcha"
                 />
               </section>
             </section>
           </div>
-
-          <!-- 登入按钮 -->
           <button class="login-submit" @click.prevent="login">登录</button>
         </form>
-        <button class="login-back">返回</button>
+        <button class="login-back" @click.prevent="$router.back()">返回</button>
       </div>
     </div>
   </div>
@@ -133,15 +160,13 @@ export default {
       return /^[1][3,4,5,7,8][0-9]{9}$/.test(this.phone);
     },
   },
-  watch: {},
   methods: {
     ...mapActions(["syncUserInfo"]),
-
-    // 处理点击
-    dealloginMode(flag) {
+    // 1. 处理登录模式
+    dealLoginMode(flag) {
       this.loginMode = flag;
     },
-    // 获取短信验证码
+    // 2. 获取短信验证码
     async getVerifyCode() {
       // 2.1 过滤
       if (this.phoneRight) {
@@ -164,8 +189,7 @@ export default {
       if (this.loginMode) {
         // 手机验证码登录
         // 3.1.1 输入数据校验
-        if (!this.phone) {
-          // console.log(this.phone);
+        if (!this.phone.trim()) {
           Toast({
             message: "请输入手机号码",
             duration: 500,
@@ -180,7 +204,7 @@ export default {
           return;
         }
 
-        if (!this.code) {
+        if (!this.code.trim()) {
           Toast({
             message: "请输入验证码",
             duration: 500,
@@ -194,10 +218,10 @@ export default {
           });
           return;
         }
-        // 3.1.2 手机验证码登录 发起请求
-        console.log(this.code);
+
+        // 3.1.2 手机验证码登录
         let result = await phoneCodeLogin(this.phone, this.code);
-        console.log(result);
+        // console.log(result);
         if (result.success_code === 200) {
           // 4.1 保存用户信息
           this.syncUserInfo(result.data);
@@ -209,15 +233,63 @@ export default {
             duration: 500,
           });
         }
-        // 3.2 用户名和密码登录
       } else {
+        // 3.2 用户名和密码登录
+        if (!this.user_name) {
+          Toast({
+            message: "请输入用户名！",
+            duration: 500,
+          });
+          return;
+        } else if (!this.pwd) {
+          Toast({
+            message: "请输入密码！",
+            duration: 500,
+          });
+          return;
+        } else if (!this.captcha) {
+          Toast({
+            message: "请输入验证码！",
+            duration: 500,
+          });
+          return;
+        }
+        // 3.2.1 发起请求
+        let result = await pwdLogin(this.user_name, this.pwd, this.captcha);
+        // console.log(result);
+        if (result.success_code === 200) {
+          // 4.1 保存用户信息
+          this.syncUserInfo(result.data);
+          // 4.2 回到主面板
+          this.$router.back();
+        } else {
+          Toast({
+            message: "登录失败，用户名或者密码不正确！",
+            duration: 500,
+          });
+        }
       }
+    },
+    // 4. 处理密码的显示
+    dealPwdMode(flag) {
+      this.pwdMode = flag;
+    },
+    // 5. 获取随机图形验证码
+    getCaptcha() {
+      // 1.获取验证码的标签
+      let captchaEle = this.$refs.captcha;
+      this.$set(
+        captchaEle,
+        "src",
+        "http://demo.itlike.com/web/xlmc/api/captcha?time=" + new Date()
+      );
+      // console.log(captchaEle);
     },
   },
 };
 </script>
 
-<style>
+<style scoped>
 .login-container {
   width: 100%;
   height: 100%;
@@ -247,7 +319,6 @@ export default {
   color: #333;
   font-size: 14px;
   padding-bottom: 4px;
-  text-decoration: none;
 }
 
 .login-container

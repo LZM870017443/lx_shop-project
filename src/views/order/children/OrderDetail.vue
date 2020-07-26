@@ -1,13 +1,50 @@
 <template>
-  <div id="orderDetail">订单详情</div>
+  <div id="orderDetail">
+    <!--导航栏-->
+    <van-nav-bar
+      title="商品清单"
+      left-arrow
+      :fixed="true"
+      :border="true"
+      @click-left="$router.go(-1)"
+    ></van-nav-bar>
+    <!--内容-->
+    <van-cell-group style="margin-top: 3rem">
+      <van-cell title="商品" :value="`共${checkedShopCount}件`"></van-cell>
+      <van-card
+        v-for="(goods, index) in checkedShopCart"
+        :key="index"
+        :num="goods.num"
+        :price="goods.price"
+        :title="goods.name"
+        :thumb="goods.small_image"
+      >
+      </van-card>
+    </van-cell-group>
+  </div>
 </template>
 
 <script>
-import { Toast } from "vant";
 import { mapState } from "vuex";
 export default {
   name: "OrderDetail",
-  computed: {},
+  computed: {
+    ...mapState(["shopCart"]),
+    // 1. 获取选中的商品
+    checkedShopCart() {
+      let shopCart = [];
+      Object.values(this.shopCart).forEach((goods, index) => {
+        if (goods.checked) {
+          shopCart.push(goods);
+        }
+      });
+      return shopCart;
+    },
+    // 2. 选中商品的总件数
+    checkedShopCount() {
+      return this.checkedShopCart.length;
+    },
+  },
 };
 </script>
 
